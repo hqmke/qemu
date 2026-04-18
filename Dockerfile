@@ -47,23 +47,20 @@ RUN set -eu && \
         wget \
         xxd \
         xz-utils && \
-    wget "https://github.com/qemus/passt/releases/download/v${VERSION_PASST}/passt_${VERSION_PASST}_${TARGETARCH}.deb" -O /tmp/passt.deb -q && \
-    dpkg -i /tmp/passt.deb && \
-    apt-get clean && \
-    mkdir -p /etc/qemu && \
-    echo "allow br0" > /etc/qemu/bridge.conf && \
-    mkdir -p /usr/share/novnc && \
-    wget "https://github.com/novnc/noVNC/archive/refs/tags/v${VERSION_VNC}.tar.gz" -O /tmp/novnc.tar.gz -q --timeout=10 && \
-    tar -xf /tmp/novnc.tar.gz -C /usr/share/novnc --strip-components=1 \
-        "noVNC-${VERSION_VNC}/app" \
-        "noVNC-${VERSION_VNC}/core" \
-        "noVNC-${VERSION_VNC}/vendor" \
-        "noVNC-${VERSION_VNC}/package.json" \
-        "noVNC-${VERSION_VNC}"/*.html && \
-    rm -f /etc/nginx/sites-enabled/default && \
-    sed -i 's/^worker_processes.*/worker_processes 1;/' /etc/nginx/nginx.conf && \
-    echo "$VERSION_ARG" > /run/version && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+        wget "https://github.com/qemus/passt/releases/download/v${VERSION_PASST}/passt_${VERSION_PASST}_${TARGETARCH}.deb" -O /tmp/passt.deb -q && \
+        apt-get install -y /tmp/passt.deb && \
+        apt-get clean && \
+        mkdir -p /etc/qemu && \
+        echo "allow br0" > /etc/qemu/bridge.conf && \
+        mkdir -p /usr/share/novnc && \
+        wget "https://github.com/novnc/noVNC/archive/refs/tags/v${VERSION_VNC}.tar.gz" -O /tmp/novnc.tar.gz -q --timeout=10 && \
+        tar -xf /tmp/novnc.tar.gz -C /tmp/ && \
+        cd "/tmp/noVNC-${VERSION_VNC}" && \
+        mv app core vendor package.json ./*.html /usr/share/novnc && \
+        unlink /etc/nginx/sites-enabled/default && \
+        sed -i 's/^worker_processes.*/worker_processes 1;/' /etc/nginx/nginx.conf && \
+        echo "$VERSION_ARG" > /run/version && \
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 COPY --chmod=755 ./src /run/
 COPY --chmod=755 ./web /var/www/
@@ -73,12 +70,11 @@ COPY --chmod=744 ./web/conf/nginx.conf /etc/nginx/default.conf
 
 ADD --chmod=755 "https://github.com/qemus/fiano/releases/download/v${VERSION_UTK}/utk_${VERSION_UTK}_${TARGETARCH}.bin" /run/utk.bin
 
-VOLUME /storage
-EXPOSE 22 5900 8006
 
 ENV BOOT="alpine"
 ENV CPU_CORES="2"
-ENV RAM_SIZE="2G"
-ENV DISK_SIZE="64G"
+ENV RAM_SIZE="4G"
+ENV DISK_SIZE="30G"
 
 ENTRYPOINT ["/usr/bin/tini", "-s", "/run/entry.sh"]
+
