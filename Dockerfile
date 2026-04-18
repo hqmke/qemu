@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM debian:trixie-slim
+FROM debian:sid-slim
 
 ARG TARGETARCH
 ARG VERSION_ARG="0.0"
