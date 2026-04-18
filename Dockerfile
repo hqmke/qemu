@@ -15,34 +15,38 @@ ARG DEBCONF_NONINTERACTIVE_SEEN="true"
 RUN set -eu && \
     apt-get update && \
     apt-get --no-install-recommends -y install \
-        bc \
-        jq \
-        xxd \
-        tini \
-        wget \
         7zip \
-        curl \
-        ovmf \
-        fdisk \
-        nginx \
-        swtpm \
-        procps \
-        ethtool \
-        iptables \
-        iproute2 \
-        dnsmasq \
-        xz-utils \
         apt-utils \
-        net-tools \
-        e2fsprogs \
-        qemu-utils \
-        websocketd \
-        iputils-ping \
-        genisoimage \
-        inotify-tools \
-        netcat-openbsd \
+        bc \
         ca-certificates \
-        qemu-system-x86 && \
+        curl \
+        dialog \
+        dnsmasq \
+        e2fsprogs \
+        ethtool \
+        fdisk \
+        genisoimage \
+        git \
+        htop \
+        inotify-tools \
+        iproute2 \
+        iptables \
+        iputils-ping \
+        jq \
+        net-tools \
+        netcat-openbsd \
+        nginx \
+        ovmf \
+        procps \
+        qemu-system-x86 \
+        qemu-utils \
+        swtpm \
+        tini \
+        vim \
+        websocketd \
+        wget \
+        xxd \
+        xz-utils && \
     wget "https://github.com/qemus/passt/releases/download/v${VERSION_PASST}/passt_${VERSION_PASST}_${TARGETARCH}.deb" -O /tmp/passt.deb -q && \
     dpkg -i /tmp/passt.deb && \
     apt-get clean && \
@@ -50,10 +54,13 @@ RUN set -eu && \
     echo "allow br0" > /etc/qemu/bridge.conf && \
     mkdir -p /usr/share/novnc && \
     wget "https://github.com/novnc/noVNC/archive/refs/tags/v${VERSION_VNC}.tar.gz" -O /tmp/novnc.tar.gz -q --timeout=10 && \
-    tar -xf /tmp/novnc.tar.gz -C /tmp/ && \
-    cd "/tmp/noVNC-${VERSION_VNC}" && \
-    mv app core vendor package.json ./*.html /usr/share/novnc && \
-    unlink /etc/nginx/sites-enabled/default && \
+    tar -xf /tmp/novnc.tar.gz -C /usr/share/novnc --strip-components=1 \
+        "noVNC-${VERSION_VNC}/app" \
+        "noVNC-${VERSION_VNC}/core" \
+        "noVNC-${VERSION_VNC}/vendor" \
+        "noVNC-${VERSION_VNC}/package.json" \
+        "noVNC-${VERSION_VNC}"/*.html && \
+    rm -f /etc/nginx/sites-enabled/default && \
     sed -i 's/^worker_processes.*/worker_processes 1;/' /etc/nginx/nginx.conf && \
     echo "$VERSION_ARG" > /run/version && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
